@@ -1,0 +1,27 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:totem_of_undying"
+    },
+    "title": {
+      "translate": "advancement.true_eternal_friend.goodbye_hello.title"
+    },
+    "description": {
+      "translate": "advancement.true_eternal_friend.goodbye_hello.description"
+    },
+    "background": "minecraft:gui/advancements/backgrounds/stone",
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

@@ -12,20 +12,10 @@ repositories {
 }
 
 loom {
-	splitEnvironmentSourceSets()
-
 	mods {
-		"true_eternalfriend" {
+		"true_eternal_friend" {
 			sourceSet sourceSets.main
-			sourceSet sourceSets.client
 		}
-	}
-}
-
-fabricApi {
-	configureDataGeneration {
-		client = true
-		modId = "true_eternalfriend"
 	}
 }
 

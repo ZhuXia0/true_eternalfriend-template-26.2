@@ -1,41 +1,27 @@
 {
-	"schemaVersion": 1,
-	"id": "true_eternalfriend",
-	"version": "${version}",
-	"name": "True_EternalFriend",
-	"description": "动物朋友相关",
-	"authors": [
-		"ZhuXia0"
-	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
-	"license": "CC0-1.0",
-	"icon": "assets/true_eternalfriend/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"com.true_eternalfriend.True_EternalFriend"
-		],
-		"client": [
-			"com.true_eternalfriend.client.True_EternalFriendClient"
-		],
-		"fabric-datagen": [
-			"com.true_eternalfriend.client.True_EternalFriendDataGenerator"
-		]
-	},
-	"mixins": [
-		"true_eternalfriend.mixins.json",
-		{
-			"config": "true_eternalfriend.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.20.1",
-		"minecraft": "~26.2",
-		"java": ">=25",
-		"fabric-api": "*"
-	}
+  "schemaVersion": 1,
+  "id": "true_eternal_friend",
+  "version": "${version}",
+  "name": "\u771f\u00b7\u6c38\u6052\u7684\u670b\u53cb / True Eternal Friend",
+  "description": "A tamed wolf returns ten minutes after death.",
+  "authors": [
+    "ZhuXia0"
+  ],
+  "license": "CC0-1.0",
+  "icon": "assets/true_eternal_friend/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.true_eternalfriend.TrueEternalFriend"
+    ]
+  },
+  "mixins": [
+    "true_eternal_friend.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": ">=0.161.0+26.2"
+  }
 }

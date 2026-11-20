@@ -1,0 +1,27 @@
+{
+  "display": {
+    "icon": {
+      "id": "true_eternal_friend:eternal_friend_tag"
+    },
+    "title": {
+      "translate": "advancement.true_eternal_friend.true_eternal_friend.title"
+    },
+    "description": {
+      "translate": "advancement.true_eternal_friend.true_eternal_friend.description"
+    },
+    "background": "minecraft:gui/advancements/backgrounds/stone",
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

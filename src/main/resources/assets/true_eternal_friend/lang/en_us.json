@@ -1,0 +1,13 @@
+{
+  "item.true_eternal_friend.eternal_friend_tag": "Eternal Friend Tag",
+  "item.true_eternal_friend.eternal_friend_tag.tooltip": "Use on a tamed wolf: +10 attack damage; revives 10 minutes after death",
+  "message.true_eternal_friend.not_tamed": "Use this only on a tamed wolf",
+  "message.true_eternal_friend.already": "Already an eternal friend",
+  "message.true_eternal_friend.bound": "This wolf is now an eternal friend!",
+  "message.true_eternal_friend.revived": "Your eternal friend has revived at its original location!",
+  "itemGroup.true_eternal_friend.main": "True Eternal Friend",
+  "advancement.true_eternal_friend.true_eternal_friend.title": "True Eternal Friend",
+  "advancement.true_eternal_friend.true_eternal_friend.description": "Use an Eternal Friend Tag on a tamed wolf for the first time",
+  "advancement.true_eternal_friend.goodbye_hello.title": "Goodbye? Hello.",
+  "advancement.true_eternal_friend.goodbye_hello.description": "Witness your eternal friend's first revival"
+}
