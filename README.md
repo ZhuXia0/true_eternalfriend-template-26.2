@@ -1,27 +1,68 @@
-# True Eternal Friend
+﻿# 真·永恒的朋友
 
-Fabric mod for Minecraft 26.2. Use the Eternal Friend Tag on a tamed wolf to add 10 attack damage. The wolf revives after 12,000 running server ticks (10 minutes) at its original position and dimension.
+Minecraft Java 26.2 Fabric 模组。逗狗棒、永恒之友铭牌、狼铠和狼爪的功能都在服务器端权威处理。
 
-## Versions
+## 版本与构建
 
-Minecraft 26.2; Java 25; Fabric Loader 0.20.1; Fabric API 0.161.0+26.2; Loom 1.19-SNAPSHOT and Gradle 9.8.2 from the supplied template. The requested Loom 1.17 and Gradle 9.5.1 differ from this template; the template versions were tested.
+- Minecraft Java Edition 26.2
+- Java 25
+- Fabric Loader 0.20.1
+- Fabric API 0.161.0+26.2
+- 工程实际使用 Loom 1.19.4、Gradle Wrapper 9.8.2
 
-## Install and build
+构建：`$env:JAVA_HOME='E:\MINECRAFT工作区\.jdk25\jdk-25.0.5+8'; .\gradlew.bat build`
 
-Install Fabric Loader and Fabric API, then place build/libs/true_eternal_friend-1.0.0.jar in mods. Run ./gradlew build (Windows: .\\gradlew.bat build). Run ./gradlew runServer for a development server. On first run, review and accept the Minecraft EULA yourself.
+安装：将 `build/libs/true_eternal_friend-1.1.0.jar` 放入 `mods` 文件夹。
 
-## Test
+## 功能
 
-Craft the tag shapelessly from one diamond and one totem of undying. Use it on a tamed wolf, then check the attack attribute, duplicate-use message, and item consumption in survival versus creative. Use /kill on the wolf, keep the server running for 10 minutes, and verify revival. Restart the save while the countdown is pending to check persistence. The countdown pauses while the server is stopped. Unloaded original chunks are retried every 20 ticks; offline owners are supported. The default policy always uses the original location.
+- 永恒之友铭牌：给已驯服狼增加 +10 攻击力，死亡后 12000 服务器 tick 复活。
+- 逗狗棒：狼的主人可打开伙伴界面，包含狼铠、储备粮和狼爪三个槽位。
+- 铁、金、钻石狼铠：防御/耐久分别为 5/500、3/300、9/2000；金狼铠提供速度 II。
+- 骨头、石头、岩浆狼爪：狼攻击力 +3/+5/+4；骨头爪缓慢，岩浆爪点燃。
+- 储备粮使用 `true_eternal_friend:dog_food` 标签，按 food 组件的 nutrition 回血，默认冷却 1200 tick。
+- 复活快照保存名字、项圈、位置、血量、装备和冷却。
 
-The mod has its own Creative Mode tab, with the Eternal Friend Tag as its icon and item. Two advancements are awarded once per player: "True Eternal Friend" when a player first binds a tamed wolf, and "Goodbye? Hello." when one of their eternal wolves first revives. If the owner is offline at revival, the award remains in the saved queue and is granted after they log in. The tag user and wolf owner can be different players; each advancement follows its stated event and recipient.
+## 进度
 
-## Texture generation
+1. 真·永恒的朋友：第一次使用铭牌。
+2. 再见？你好：第一次复活。
+3. 伙伴相逢：第一次打开伙伴界面。
+4. 穿上装备：第一次给永恒的朋友装备狼铠。
+5. 利爪初鸣：第一次用狼爪造成伤害。
+6. 加餐时间：第一次用储备粮自动治疗狼。
 
-Run python tools/gen_tag_texture.py with Pillow installed. This deterministic fallback produces the 16x16 RGBA item texture and a 64x64 mod icon. An image generation tool can instead use the prompt in the task request and replace the texture.
+## 测试
 
-## 26.2 differences and limitations
+打开创造模式物品栏，合成各物品，测试界面、装备、食物回血、`/kill`与复活。调试命令：`/eternalfriend debug gear <实体ID>`。
 
-Minecraft 26.2 uses Mojang package names, Attributes.ATTACK_DAMAGE, AttributeModifier.Operation.ADD_VALUE, Identifier.fromNamespaceAndPath, Item.Properties.setId, ValueInput/ValueOutput, SavedDataType, ServerTickEvents.END_LEVEL_TICK, and EntityTypes.WOLF. These were checked against locally cached 26.2 Minecraft and Fabric API jars. A minimal Wolf mixin stores the permanent marker. The Fabric ALLOW_DEATH event removes the wolf before vanilla drops and experience. A missing dimension or unloaded original chunk delays revival; the wolf is never moved to its owner.
+## 26.2 API 差异与已知限制
 
-The development server loaded the mod but stopped at the initial EULA prompt, so in-game behavior has not been manually tested.
+26.2 使用 Mojang 命名、`Attributes.ATTACK_DAMAGE`、`Identifier.fromNamespaceAndPath`、`ValueInput/ValueOutput`、`SavedDataType` 和 `EquipmentSlot.BODY`。狼铠吸收伤害需要 Wolf mixin。区块未加载时复活会延后重试。
+
+## 更新记录
+
+### 1.1.0 伙伴界面文字修复（2026-11-20）
+
+修复伙伴界面全部文字因颜色缺少 alpha 通道而完全透明的问题。26.2 的 `GuiGraphicsExtractor.text` 使用 ARGB 颜色，界面文字统一改为不透明的 `0xFF404040`。
+
+### 1.1.0 伙伴属性显示修复（2026-11-20）
+
+修复客户端伙伴菜单没有写入服务器同步数据的问题；右侧属性改为短行展示生命、防御、总攻击、铭牌与狼爪加成、狼铠耐久、进食冷却和下次回血。左侧三个槽位向右调整，确保槽位说明完整显示。
+
+### 1.1.0 伙伴界面修复（2026-11-20）
+
+将伙伴界面背景恢复为 256×256，界面代码同步按 256×256 采样。此前 1024×1024 的背景仍按原有坐标绘制，导致界面只显示左上角的一部分。物品图标和狼铠装备纹理保持原分辨率。
+
+### 1.1.0 贴图与构建修订（2026-11-20）
+
+修复伙伴界面防御与攻击属性同步时的 `long` 转 `int` 编译错误。全部八种物品图标直接在 64×64 上重绘；三种狼铠的狼身装备纹理直接在 256×128 上绘制细节，并保留原版装备 UV 的透明区域。重绘脚本位于工作区 `tools/redraw_companion_items.py`；需要 Pillow，运行 `python E:\MINECRAFT工作区\tools\redraw_companion_items.py` 可重新生成。修改 PNG 后无需运行脚本，直接构建即可。旧版 `tools/gen_companion_textures.py` 也会在末尾调用新脚本，避免恢复旧贴图。
+
+### 1.1.0
+
+新增逗狗棒、狼伙伴界面、三种狼铠、三种狼爪、自动进食、复活快照装备联动、四个新进度、像素贴图和调试命令。
+
+### 1.0.0
+
+新增永恒之友铭牌、+10 攻击力、十分钟复活和两个基础进度。
+

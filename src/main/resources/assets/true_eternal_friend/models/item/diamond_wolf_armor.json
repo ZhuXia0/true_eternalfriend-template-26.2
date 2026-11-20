@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "true_eternal_friend:item/diamond_wolf_armor"
+  }
+}

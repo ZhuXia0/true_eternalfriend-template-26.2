@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "true_eternal_friend:item/bone_wolf_claw"
+  }
+}

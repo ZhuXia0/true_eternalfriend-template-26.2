@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "MMM",
+    "   ",
+    "IPI"
+  ],
+  "key": {
+    "M": "minecraft:bone",
+    "I": "minecraft:iron_ingot",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "true_eternal_friend:bone_wolf_claw",
+    "count": 1
+  }
+}

@@ -13,6 +13,9 @@
   "entrypoints": {
     "main": [
       "com.true_eternalfriend.TrueEternalFriend"
+    ],
+    "client": [
+      "com.true_eternalfriend.TrueEternalFriendClient"
     ]
   },
   "mixins": [

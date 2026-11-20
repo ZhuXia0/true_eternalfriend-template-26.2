@@ -1,0 +1,27 @@
+{
+  "parent": "true_eternal_friend:true_eternal_friend",
+  "display": {
+    "icon": {
+      "id": "true_eternal_friend:dog_teaser"
+    },
+    "title": {
+      "translate": "advancement.true_eternal_friend.companion_screen.title"
+    },
+    "description": {
+      "translate": "advancement.true_eternal_friend.companion_screen.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "event": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "event"
+    ]
+  ]
+}

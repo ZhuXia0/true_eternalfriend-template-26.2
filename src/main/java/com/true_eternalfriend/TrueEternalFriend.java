@@ -24,10 +24,15 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 
 public final class TrueEternalFriend implements ModInitializer {
@@ -43,15 +48,38 @@ public final class TrueEternalFriend implements ModInitializer {
         Identifier.fromNamespaceAndPath(MOD_ID, "main"), FabricCreativeModeTab.builder()
             .title(Component.translatable("itemGroup.true_eternal_friend.main"))
             .icon(() -> new ItemStack(TAG))
-            .displayItems((parameters, output) -> output.accept(TAG))
+            .displayItems((parameters, output) -> {
+                output.accept(TAG);
+                output.accept(CompanionItems.DOG_TEASER);
+                output.accept(CompanionItems.IRON_WOLF_ARMOR);
+                output.accept(CompanionItems.GOLDEN_WOLF_ARMOR);
+                output.accept(CompanionItems.DIAMOND_WOLF_ARMOR);
+                output.accept(CompanionItems.BONE_WOLF_CLAW);
+                output.accept(CompanionItems.STONE_WOLF_CLAW);
+                output.accept(CompanionItems.MAGMA_WOLF_CLAW);
+            })
             .build());
 
     @Override public void onInitialize() {
+        CompanionItems.bootstrap();
+        CompanionConfig.load();
+        CompanionCommands.register();
+        MenuType<?> ignored = WolfCompanionMenu.TYPE;
         UseEntityCallback.EVENT.register((player, world, hand, entity, hit) -> {
-            if (world.isClientSide() || player.getItemInHand(hand).isEmpty() || !player.getItemInHand(hand).is(TAG)) return InteractionResult.PASS;
+            if (world.isClientSide() || player.getItemInHand(hand).isEmpty() ||
+                (!player.getItemInHand(hand).is(TAG) && !player.getItemInHand(hand).is(CompanionItems.DOG_TEASER))) return InteractionResult.PASS;
             if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
             if (!(entity instanceof Wolf wolf) || !wolf.isTame()) {
                 serverPlayer.sendSystemMessage(Component.translatable("message.true_eternal_friend.not_tamed"), true);
+                return InteractionResult.SUCCESS;
+            }
+            if (!wolf.isOwnedBy(serverPlayer)) {
+                serverPlayer.sendSystemMessage(Component.translatable("message.true_eternal_friend.not_owner"), true);
+                return InteractionResult.SUCCESS;
+            }
+            if (player.getItemInHand(hand).is(CompanionItems.DOG_TEASER)) {
+                serverPlayer.openMenu(WolfCompanionMenu.provider(wolf));
+                ModAdvancements.grant(serverPlayer, ModAdvancements.COMPANION_SCREEN);
                 return InteractionResult.SUCCESS;
             }
             if (((EternalWolf) wolf).trueEternalFriend$isEternal()) {
@@ -75,9 +103,36 @@ public final class TrueEternalFriend implements ModInitializer {
             wolf.discard(); // ALLOW_DEATH runs before vanilla loot and experience handling.
             return false;
         });
-        ServerTickEvents.END_LEVEL_TICK.register(level -> {
-            if (level.dimension() == Level.OVERWORLD) ReviveState.get(level.getServer()).tick(level.getServer());
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            for (ServerLevel level : server.getAllLevels()) {
+                for (net.minecraft.world.entity.Entity entity : level.getAllEntities()) {
+                    if (entity instanceof Wolf wolf && wolf.isAlive()) CompanionLogic.tick(wolf);
+                }
+            }
+            ReviveState.get(server).tick(server);
         });
+        ServerLivingEntityEvents.AFTER_DAMAGE.register((target, source, baseDamage, damageTaken, blocked) -> {
+            if (blocked || damageTaken <= 0 || !(source.getEntity() instanceof LivingEntity attacker)) return;
+            Item claw = attacker instanceof Wolf wolf ? ((CompanionWolf) wolf).trueEternalFriend$gear().getItem(1).getItem()
+                : attacker instanceof Player ? attacker.getMainHandItem().getItem() : null;
+            if (attacker instanceof ServerPlayer player && CompanionItems.isClaw(claw)) {
+                ModAdvancements.grant(player, ModAdvancements.FIRST_CLAW_HIT);
+            } else if (attacker instanceof Wolf wolf && CompanionItems.isClaw(claw)) {
+                awardOwner(wolf, ModAdvancements.FIRST_CLAW_HIT);
+            }
+            if (claw == CompanionItems.BONE_WOLF_CLAW) {
+                target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 0), attacker);
+            } else if (claw == CompanionItems.MAGMA_WOLF_CLAW && !target.fireImmune() && !target.isInWaterOrRain()) {
+                target.igniteForSeconds(4);
+            }
+        });
+    }
+
+    static void awardOwner(Wolf wolf, Identifier advancement) {
+        if (wolf.getOwnerReference() != null && wolf.level() instanceof ServerLevel level) {
+            ServerPlayer owner = level.getServer().getPlayerList().getPlayer(wolf.getOwnerReference().getUUID());
+            if (owner != null) ModAdvancements.grant(owner, advancement);
+        }
     }
 
     public static void applyAttack(Wolf wolf) {

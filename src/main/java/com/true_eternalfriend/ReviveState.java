@@ -30,6 +30,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
@@ -50,9 +52,12 @@ public final class ReviveState extends SavedData {
         for (Snapshot s : pending) if (s.original.equals(wolf.getUUID())) return;
         UUID owner = wolf.getOwnerReference() == null ? null : wolf.getOwnerReference().getUUID();
         JsonElement name = wolf.getCustomName() == null ? null : ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, wolf.getCustomName()).result().orElse(null);
+        CompanionWolf companion = (CompanionWolf) wolf;
         pending.add(new Snapshot(UUID.randomUUID(), wolf.getUUID(), owner, name, wolf.getCollarColor().getId(),
             wolf.isOrderedToSit(), wolf.getHealth(), wolf.getX(), wolf.getY(), wolf.getZ(),
-            wolf.level().dimension().identifier().toString(), TrueEternalFriend.REVIVE_TICKS, System.currentTimeMillis()));
+            wolf.level().dimension().identifier().toString(), TrueEternalFriend.REVIVE_TICKS, System.currentTimeMillis(),
+            encodeStack(wolf.getItemBySlot(EquipmentSlot.BODY)), encodeStack(companion.trueEternalFriend$gear().getItem(0)),
+            encodeStack(companion.trueEternalFriend$gear().getItem(1)), companion.trueEternalFriend$eatCooldown()));
         setDirty();
     }
 
@@ -81,8 +86,15 @@ public final class ReviveState extends SavedData {
             wolf.setOrderedToSit(s.sitting);
             wolf.setInSittingPose(s.sitting);
             ((EternalWolf) wolf).trueEternalFriend$setEternal(true);
+            CompanionLogic.ensureHealth(wolf);
+            wolf.setHealth(Math.max(1, Math.min(s.health, wolf.getMaxHealth())));
+            wolf.setItemSlot(EquipmentSlot.BODY, decodeStack(s.armor));
+            CompanionWolf companion = (CompanionWolf) wolf;
+            companion.trueEternalFriend$gear().setItem(0, decodeStack(s.food));
+            companion.trueEternalFriend$gear().setItem(1, decodeStack(s.claw));
+            companion.trueEternalFriend$setEatCooldown(s.eatCooldown);
             TrueEternalFriend.applyAttack(wolf);
-            wolf.setHealth(wolf.getMaxHealth());
+            CompanionLogic.applyClaw(wolf);
             if (!level.addFreshEntity(wolf)) { s.remaining = 20; setDirty(); continue; }
             iterator.remove();
             setDirty();
@@ -117,6 +129,10 @@ public final class ReviveState extends SavedData {
             o.addProperty("x", s.x); o.addProperty("y", s.y); o.addProperty("z", s.z);
             o.addProperty("dimension", s.dimension); o.addProperty("remaining", s.remaining);
             o.addProperty("deathMillis", s.deathMillis); o.addProperty("attackBonus", TrueEternalFriend.ATTACK_BONUS);
+            if (s.armor != null) o.add("armor", s.armor);
+            if (s.food != null) o.add("food", s.food);
+            if (s.claw != null) o.add("claw", s.claw);
+            o.addProperty("eatCooldown", s.eatCooldown);
             array.add(o);
         }
         JsonObject root = new JsonObject();
@@ -141,7 +157,8 @@ public final class ReviveState extends SavedData {
                 o.has("owner") ? UUID.fromString(o.get("owner").getAsString()) : null, o.get("name"),
                 o.get("collar").getAsInt(), o.get("sitting").getAsBoolean(), o.get("health").getAsFloat(),
                 o.get("x").getAsDouble(), o.get("y").getAsDouble(), o.get("z").getAsDouble(),
-                o.get("dimension").getAsString(), o.get("remaining").getAsInt(), o.get("deathMillis").getAsLong()));
+                o.get("dimension").getAsString(), o.get("remaining").getAsInt(), o.get("deathMillis").getAsLong(),
+                o.get("armor"), o.get("food"), o.get("claw"), o.has("eatCooldown") ? o.get("eatCooldown").getAsInt() : 0));
         }
         return state;
     }
@@ -155,12 +172,24 @@ public final class ReviveState extends SavedData {
         final double x, y, z;
         final String dimension;
         final long deathMillis;
+        final JsonElement armor, food, claw;
+        final int eatCooldown;
         int remaining;
         Snapshot(UUID reviveId, UUID original, UUID owner, JsonElement name, int collar, boolean sitting, float health,
-                 double x, double y, double z, String dimension, int remaining, long deathMillis) {
+                 double x, double y, double z, String dimension, int remaining, long deathMillis,
+                 JsonElement armor, JsonElement food, JsonElement claw, int eatCooldown) {
             this.reviveId=reviveId; this.original=original; this.owner=owner; this.name=name; this.collar=collar;
             this.sitting=sitting; this.health=health; this.x=x; this.y=y; this.z=z; this.dimension=dimension;
             this.remaining=remaining; this.deathMillis=deathMillis;
+            this.armor=armor; this.food=food; this.claw=claw; this.eatCooldown=eatCooldown;
         }
+    }
+
+    private static JsonElement encodeStack(ItemStack stack) {
+        return stack.isEmpty() ? null : ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, stack).result().orElse(null);
+    }
+
+    private static ItemStack decodeStack(JsonElement element) {
+        return element == null ? ItemStack.EMPTY : ItemStack.CODEC.parse(JsonOps.INSTANCE, element).result().orElse(ItemStack.EMPTY);
     }
 }
